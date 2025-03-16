@@ -2,6 +2,11 @@
 #include <vector>
 #include "input.h"
 
+struct Geometry
+{
+    std::vector<double> indices;
+    std::vector<double> edges;
+};
 
 std::vector<double> createIntervals(Problem prob);
 
