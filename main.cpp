@@ -43,17 +43,16 @@ int main()
 
     std::vector<double> interfaces{ createIntervals(problem) };
     std::vector<double> midpoints{ findMidpoints(interfaces) };
-    
     struct Geometry geometry { midpoints, interfaces };
 
     std::cout << "x_(i+1/2): " << std::endl << geometry.edges;
     std::cout << "x_i: " << std::endl << geometry.indices;
 
     std::vector<std::vector<double>> opticalDepthMatrix{ createOpticalDepthMatrix(problem, geometry) };
-
     std::cout << "t_(ii'): " << std::endl << opticalDepthMatrix;
 
-    std::cout << "P_(ii'): " << std::endl << createCollProbMatrix(problem, opticalDepthMatrix);
+    std::cout << "P_(ii'): " << std::endl << createCollProbMatrix(problem, opticalDepthMatrix, geometry);
+
 
     return 0;
 }
