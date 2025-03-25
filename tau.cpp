@@ -2,6 +2,8 @@
 #include <vector>
 #include "input.h"
 #include "geom.h"
+#include "tau.h"
+
 
 double findSigma(const Problem& prob, int index, const Geometry& geom)
 {
@@ -18,7 +20,7 @@ double findSigma(const Problem& prob, int index, const Geometry& geom)
 }
 
 
-double calculateOpticalDepth(const Problem& prob, int start, int end, const Geometry& geom)
+double calculateOpticalDepth(const Problem& prob, int start, int end, const Geometry& geom, Eigen::VectorXd Sigma)
 {
     std::vector<int> mats{ prob.cellMaterial };
     double tau{ 0.0 };
@@ -44,15 +46,22 @@ double calculateOpticalDepth(const Problem& prob, int start, int end, const Geom
 }
 
 
-std::vector<std::vector<double>> createOpticalDepthMatrix(const Problem& prob, const Geometry& geom)
+std::vector<std::vector<double>> createOpticalDepthMatrix(const Problem& prob,
+    const Geometry& geom, Eigen::VectorXd Sigma)
 {
     size_t n{ geom.indices.size() };
     std::vector<std::vector<double>> opticalDepthMatrix{
         std::vector<std::vector<double>>(n, std::vector<double>(n))};
 
+    // arr[row][col]
+
     for (size_t i = 0; i < n; i++) // iterate over indices
         for (size_t j = 0; j < n; j++)
-            opticalDepthMatrix[i][j] = calculateOpticalDepth(prob, i, j, geom);
+            opticalDepthMatrix[i][j] = calculateOpticalDepth(prob, i, j, geom, Sigma);
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < i; j++)
+            opticalDepthMatrix[i][j] = opticalDepthMatrix[j][i];
 
     return opticalDepthMatrix;
 }

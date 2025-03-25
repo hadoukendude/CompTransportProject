@@ -31,7 +31,7 @@ std::vector<double> createIntervals(Problem prob)
     //}
     for (auto e : prob.dimensions)
     {
-        nPoints = 1;
+        nPoints = 2;
         // assume dimensions lists cumulative distance
         std::vector<double> newInterval = linspace(mesh.back(), e, nPoints + 1);
         mesh.insert(mesh.end(), newInterval.begin(), newInterval.end());

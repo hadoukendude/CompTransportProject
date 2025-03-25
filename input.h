@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+
 namespace ProblemType
 {
     enum ProblemType
@@ -34,16 +35,16 @@ struct Problem
     Lboundary::Lboundary lboundary;
     Rboundary::Rboundary rboundary;
 
-    std::vector<int> materials;
-    std::vector<double> sig_a;
+    std::vector<int> materials; // list of materials
+    std::vector<double> sig_a; // xs corresponding to the above material
     std::vector<double> sig_s;
     std::vector<double> sig_f;
     std::vector<double> nsig_f;
     std::vector<double> sigma;
 
-    std::vector<int> cellMaterial;
-    std::vector<double> dimensions;
-    std::vector<double> source;
+    std::vector<int> cellMaterial; // list of materials for each cell in order
+    std::vector<double> dimensions; // position of each material interface
+    std::vector<double> source; // source term for each cell
 };
 
 struct Problem parseInput(std::string name);

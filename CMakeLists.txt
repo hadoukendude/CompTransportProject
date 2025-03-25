@@ -19,7 +19,7 @@ find_package (Eigen3 REQUIRED)
 
 
 # Add source to this project's executable.  
-add_executable (CompTransportProject "main.cpp" "main.h" "input.cpp" "input.h" "tau.cpp" "geom.cpp" "geom.h" "tau.h" "collprob.cpp" "collprob.h")  
+add_executable (CompTransportProject "main.cpp" "main.h" "input.cpp" "input.h" "tau.cpp" "geom.cpp" "geom.h" "tau.h" "collprob.cpp" "collprob.h" "matrix.h" "matrix.cpp" "eigenvalue.cpp")  
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)  
  set_property(TARGET CompTransportProject PROPERTY CXX_STANDARD 20)  

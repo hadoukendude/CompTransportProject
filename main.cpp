@@ -2,11 +2,13 @@
 
 #include <iostream>
 #include <vector>
+
 #include "main.h"
 #include "input.h"
 #include "geom.h"
 #include "tau.h"
 #include "collprob.h"
+#include "matrix.h"
 
 #include <Eigen/Dense>
 
@@ -37,22 +39,40 @@ int main()
 
     std::cout << "sigma_total: " << problem.sigma << std::endl;
 
-    std::cout << "Materials: " << problem.materials << std::endl;
-    std::cout << "Cells: " << problem.cellMaterial << std::endl;
-    std::cout << "Dimensions: " << problem.dimensions << std::endl;
+    std::cout << "Materials: " << problem.materials;
+    std::cout << "Cells: " << problem.cellMaterial;
+    std::cout << "Dimensions: " << problem.dimensions;
 
     std::vector<double> interfaces{ createIntervals(problem) };
     std::vector<double> midpoints{ findMidpoints(interfaces) };
     struct Geometry geometry { midpoints, interfaces };
 
     std::cout << "x_(i+1/2): " << std::endl << geometry.edges;
-    std::cout << "x_i: " << std::endl << geometry.indices;
+    std::cout << "x_i: " << std::endl << geometry.indices << std::endl;
 
-    std::vector<std::vector<double>> opticalDepthMatrix{ createOpticalDepthMatrix(problem, geometry) };
-    std::cout << "t_(ii'): " << std::endl << opticalDepthMatrix;
+    
+    struct MatrixData matrix_data;
+    initializeDelta(problem, geometry, matrix_data);
+    std::cout << "D_i: " << std::endl << matrix_data.D.adjoint() << std::endl;
+    initializeXS(problem, geometry, matrix_data);
+    std::cout << "total: " << std::endl << matrix_data.X.adjoint() << std::endl;
+    std::cout << "scattering: " << std::endl << matrix_data.S.adjoint() << std::endl;
+    std::cout << "fission: " << std::endl << matrix_data.F.adjoint() << std::endl;
+    std::cout << "source: " << std::endl << matrix_data.G.adjoint() << std::endl;
 
-    std::cout << "P_(ii'): " << std::endl << createCollProbMatrix(problem, opticalDepthMatrix, geometry);
+    
+    std::vector<std::vector<double>> opticalDepthMatrix{ createOpticalDepthMatrix(problem, geometry, matrix_data.X) };
+    std::cout << std::endl << "t_(ii'): " << std::endl << opticalDepthMatrix; // TODO replace geom with matdata and remove findSigma
 
+    Eigen::MatrixXd collProbMat{ createCollProbMatrix(problem, opticalDepthMatrix, matrix_data) };
+    std::cout << "P_(ii'): " << std::endl << collProbMat << std::endl; // likely needs more testing
 
+    initializeTransportMatrix(matrix_data, collProbMat);
+    std::cout << std::endl << "H: " << std::endl << matrix_data.H; // fix narrowing conversion
+
+    // schizo 3 am bs
+    matrix_data.R = matrix_data.H.inverse() * matrix_data.G;
+    std::cout << std::endl << std::endl << matrix_data.R;
+    std::cout << std::endl << std::endl << matrix_data.R.array()/matrix_data.X.array()/matrix_data.D.array();
     return 0;
 }
