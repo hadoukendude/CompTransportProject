@@ -50,5 +50,5 @@ void initializeTransportMatrix(struct MatrixData& matData, Eigen::MatrixXd collP
     matData.S.array() /= matData.X.array();
     std::cout << matData.S.adjoint() << std::endl;
     std::cout << matData.S.asDiagonal().toDenseMatrix();
-    matData.H = I - (collProbMat * matData.S.asDiagonal());
+    matData.H = I - (collProbMat * matData.S.asDiagonal() + collProbMat * matData.F.asDiagonal());
 }

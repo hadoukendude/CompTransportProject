@@ -28,12 +28,12 @@ Eigen::MatrixXd createCollProbMatrix(const Problem& prob, const std::vector<std:
 
     for (size_t i = 0; i < n; i++)
     {
+            sigma_i = matData.X[i];     // row/destination
+            delta_i = matData.D[i];
+
         for (size_t j = 0; j < n; j++)
         {
-            sigma_i = matData.X[i];
-            sigma_j = matData.X[j];
-
-            delta_i = matData.D[i];
+            sigma_j = matData.X[j];     // column/source
             delta_j = matData.D[j];
             
             if (i == j)
@@ -41,8 +41,10 @@ Eigen::MatrixXd createCollProbMatrix(const Problem& prob, const std::vector<std:
                 P(i,j) = 1. - 1. / (2 * sigma_j * delta_j) * (1. - 2. * expint(3, sigma_j * delta_j));
             }
             else
+            {
                 P(i,j) = 1. / (2. * sigma_j*delta_j) * (expint(3,tau[i][j]) - expint(3,tau[i][j] + sigma_i*delta_i)
                     - expint(3, tau[i][j] + sigma_j*delta_j) + expint(3, tau[i][j] + sigma_i*delta_i + sigma_j*delta_j));
+            }
         }
     }
 
