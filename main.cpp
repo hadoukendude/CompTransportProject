@@ -9,6 +9,9 @@
 #include "tau.h"
 #include "collprob.h"
 #include "matrix.h"
+#include "fixedsource.h"
+#include "eigenvalue.h"
+#include "plot.h"
 
 #include <Eigen/Dense>
 
@@ -17,7 +20,7 @@ std::ostream& operator<<(std::ostream& out, const std::vector<V>& v)
 {
     for (auto e : v)
         out << e << " ";
-    return out << std::endl;
+    return out << '\n';
 }
 template <typename W>
 std::ostream& operator<<(std::ostream& out, const std::vector<std::vector<W>>& v)
@@ -28,16 +31,23 @@ std::ostream& operator<<(std::ostream& out, const std::vector<std::vector<W>>& v
         {
             out << f << '\t';
         }
-        out << std::endl;
+        out << '\n';
     }
-    return out << std::endl;
+    return out << '\n';
 }
 
 int main()
 {
     Problem problem{ parseInput("problem1") };
 
-    std::cout << "sigma_total: " << problem.sigma << std::endl;
+    std::cout << "sigma_total: " << problem.sigma << '\n';
+
+    for (size_t i = 0; i < problem.sigma.size(); i++) // absorption cross section perturbation
+    {
+        problem.sig_a[i] *= 1;
+        problem.sigma[i] = problem.sig_a[i] + problem.sig_s[i];
+    }
+
     std::cout << "Materials: " << problem.materials;
     std::cout << "Cells: " << problem.cellMaterial;
     std::cout << "Dimensions: " << problem.dimensions;
@@ -45,42 +55,43 @@ int main()
     std::vector<double> interfaces{ createIntervals(problem) };
     std::vector<double> midpoints{ findMidpoints(interfaces) };
     struct Geometry geometry { midpoints, interfaces };
-    std::cout << "x_(i+1/2): " << std::endl << geometry.edges;
-    std::cout << "x_i: " << std::endl << geometry.indices << std::endl;
+    std::cout << "x_(i+1/2): " << '\n' << geometry.edges;
+    std::cout << "x_i: " << '\n' << geometry.indices << '\n';
 
     struct MatrixData matrix_data;
     initializeDelta(problem, geometry, matrix_data);
-    std::cout << "D_i: " << std::endl << matrix_data.D.adjoint() << std::endl;
+    std::cout << "D_i: " << '\n' << matrix_data.D.adjoint() << '\n';
 
     initializeXS(problem, geometry, matrix_data);
-    std::cout << "total: " << std::endl << matrix_data.X.adjoint() << std::endl;
-    std::cout << "scattering: " << std::endl << matrix_data.S.adjoint() << std::endl;
-    std::cout << "fission: " << std::endl << matrix_data.F.adjoint() << std::endl;
-    std::cout << "source: " << std::endl << matrix_data.G.adjoint() << std::endl;
+    std::cout << "total: " << '\n' << matrix_data.X.adjoint() << '\n';
+    std::cout << "scattering: " << '\n' << matrix_data.S.adjoint() << '\n';
+    std::cout << "fission: " << '\n' << matrix_data.F.adjoint() << '\n';
+    if (problem.problemType == ProblemType::fixedsource)
+        std::cout << "source: " << '\n' << matrix_data.G.adjoint() << '\n';
 
     std::vector<std::vector<double>> opticalDepthMatrix{ createOpticalDepthMatrix(problem, geometry, matrix_data.X) };
-    std::cout << std::endl << "t_(ii'): " << std::endl << opticalDepthMatrix; // TODO replace geom with matdata and remove findSigma
+    std::cout << '\n' << "t_(ii'): " << '\n' << opticalDepthMatrix;
 
     Eigen::MatrixXd collProbMat{ createCollProbMatrix(problem, opticalDepthMatrix, matrix_data) };
-    std::cout << "P_(ii'): " << std::endl << collProbMat << std::endl; // likely correct
+    std::cout << "P_(ii'): " << '\n' << collProbMat << '\n'; // ------- TODO add reflective BC ---------
 
-    //int a;
-    //std::cin >> a;
-    //int b;
-    //std::cin >> b;
+    //int a, b;
+    //std::cin >> a, b;
     //std::cout << collProbMat(b, a) * matrix_data.X(a) * matrix_data.D(a) << std::endl;  // reciprocity
     //std::cout << collProbMat(a, b) * matrix_data.X(b) * matrix_data.D(b) << std::endl;
 
-    //for (size_t i = 0; i < matrix_data.D.size() ; i++)
-    //    std::cout << collProbMat.col(i).sum() << std::endl;  // herbert's conservation (=1, for specular, <1 for vacuum)
+    for (size_t i = 0; i < matrix_data.D.size() ; i++)
+        std::cout << collProbMat.col(i).sum() << std::endl;  // herbert's conservation (=1, for specular, <1 for vacuum)
 
-    initializeTransportMatrix(matrix_data, collProbMat);
-    std::cout << std::endl << "H: " << std::endl << matrix_data.H; // fix narrowing conversion
+    if (problem.problemType == ProblemType::fixedsource)
+        solveTransportFS(matrix_data, collProbMat);
+    else
+        solveTransportEV(matrix_data, collProbMat);
 
-    // schizo 3 am bs
-    matrix_data.G = collProbMat * matrix_data.G;
-    matrix_data.R = matrix_data.H.inverse() * matrix_data.G;
-    std::cout << std::endl << std::endl << matrix_data.R;
-    std::cout << std::endl << "Flux:" << std::endl << matrix_data.R.array() / matrix_data.X.array() / matrix_data.D.array();
-    //return 0;
+    //std::cout << '\n' << "H: " << '\n' << matrix_data.H;
+
+    std::cout << matrix_data.Flux << '\n';
+    //plotter(matrix_data);
+    
+    return 0;
 }

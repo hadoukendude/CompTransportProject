@@ -6,7 +6,7 @@
 struct MatrixData
 {
     Eigen::MatrixXd P; // collision probability matrix
-    Eigen::VectorXd R; // collision rate
+    Eigen::VectorXd R; // collision rate vector
     Eigen::VectorXd D; // interval width vector
     Eigen::VectorXd G; // source vector
 
@@ -15,8 +15,10 @@ struct MatrixData
     Eigen::VectorXd F; // fission xs vector
 
     Eigen::MatrixXd H; // transport matrix
+    Eigen::VectorXd Flux; // final flux distribution
+
+    double k{ 1.0 }; // eigenvalue
 };
 
 void initializeDelta(struct Problem& prob, struct Geometry& geom, struct MatrixData& matrix_data);
 void initializeXS(struct Problem& prob, struct Geometry& geom, struct MatrixData& matrix_data);
-void initializeTransportMatrix(struct MatrixData& matData, Eigen::MatrixXd collProbMat);

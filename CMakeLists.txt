@@ -14,12 +14,13 @@ project ("CompTransportProject")
 
 # Specify the path to Boost
 find_package(Boost REQUIRED COMPONENTS math)
-# Specify the path to Eigen3  
-find_package (Eigen3 REQUIRED)
-
+# Specify the path to Eigen 
+find_package(Eigen3 REQUIRED)
+# Specify the path to sciplot
+find_package(sciplot REQUIRED)
 
 # Add source to this project's executable.  
-add_executable (CompTransportProject "main.cpp" "main.h" "input.cpp" "input.h" "tau.cpp" "geom.cpp" "geom.h" "tau.h" "collprob.cpp" "collprob.h" "matrix.h" "matrix.cpp" "eigenvalue.cpp")  
+add_executable (CompTransportProject "main.cpp" "main.h" "input.cpp" "input.h" "tau.cpp" "geom.cpp" "geom.h" "tau.h" "collprob.cpp" "collprob.h" "matrix.h" "matrix.cpp" "eigenvalue.cpp" "plot.cpp" "plot.h" "fixedsource.cpp" "fixedsource.h" "eigenvalue.h")  
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)  
  set_property(TARGET CompTransportProject PROPERTY CXX_STANDARD 20)  
@@ -27,4 +28,4 @@ endif()
 
 # TODO: Add tests and install targets if needed.  
 
-target_link_libraries (CompTransportProject Boost::math Eigen3::Eigen)
+target_link_libraries (CompTransportProject Boost::math Eigen3::Eigen sciplot::sciplot)

@@ -16,13 +16,15 @@ void initializeXS(struct Problem& prob, struct Geometry& geom, struct MatrixData
     matrix_data.X = Eigen::VectorXd::Zero(n);
     matrix_data.S = Eigen::VectorXd::Zero(n);
     matrix_data.F = Eigen::VectorXd::Zero(n);
+
     matrix_data.G = Eigen::VectorXd::Zero(n);
+    matrix_data.Flux = Eigen::VectorXd::Ones(n);
 
     int i{ 0 }; // cell number
     double x_i{ 0 };
     int matNo{ 0 };
 
-    for (int index = 0; index < n; index++) // meshpoint/subinterval number
+    for (int index = 0; index < n; index++) // mesh point/subinterval number
     {
         i = 0;
         x_i = geom.indices[index];
@@ -33,22 +35,10 @@ void initializeXS(struct Problem& prob, struct Geometry& geom, struct MatrixData
             i++;
         }
         if (prob.problemType == ProblemType::fixedsource)
-            matrix_data.G[index] = prob.source[i]*matrix_data.D[i];
+            matrix_data.G[index] = prob.source[i];
         matNo = prob.materials[prob.cellMaterial[i]];
-        matrix_data.X[index] = prob.sigma[matNo] ? prob.sigma[matNo] : 1e-8;
+        matrix_data.X[index] = prob.sigma[matNo] ? prob.sigma[matNo] : 1e-10;
         matrix_data.S[index] = prob.sig_s[matNo];
         matrix_data.F[index] = prob.nsig_f[matNo];
     }
-}
-
-void initializeTransportMatrix(struct MatrixData& matData, Eigen::MatrixXd collProbMat)
-{
-    int n = collProbMat.rows();
-    matData.H = Eigen::MatrixXd::Zero(n,n);
-    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(n,n);
-
-    matData.S.array() /= matData.X.array();
-    std::cout << matData.S.adjoint() << std::endl;
-    std::cout << matData.S.asDiagonal().toDenseMatrix();
-    matData.H = I - (collProbMat * matData.S.asDiagonal() + collProbMat * matData.F.asDiagonal());
 }

@@ -8,6 +8,6 @@ struct Geometry
     std::vector<double> edges;
 };
 
-std::vector<double> createIntervals(Problem prob);
+std::vector<double> createIntervals(const Problem& prob);
 
-std::vector<double> findMidpoints(std::vector<double> mesh);
+std::vector<double> findMidpoints(const std::vector<double>& mesh);

@@ -12,7 +12,7 @@ std::vector<double> linspace(double start, double end, int num)
     return result;
 }
 
-std::vector<double> createIntervals(Problem prob)
+std::vector<double> createIntervals(const Problem& prob)
 {
     std::vector<double> mesh{ 0.0 };
     
@@ -31,7 +31,7 @@ std::vector<double> createIntervals(Problem prob)
     //}
     for (auto e : prob.dimensions)
     {
-        //nPoints = 5;
+        nPoints = 1;
         // assume dimensions lists cumulative distance
         std::vector<double> newInterval = linspace(mesh.back(), e, nPoints + 1);
         mesh.insert(mesh.end(), newInterval.begin(), newInterval.end());
@@ -40,10 +40,10 @@ std::vector<double> createIntervals(Problem prob)
     return mesh;
 }
 
-std::vector<double> findMidpoints(std::vector<double> mesh)
+std::vector<double> findMidpoints(const std::vector<double>& mesh)
 {
     std::vector<double> midpoints{};
     for (int i = 0; i < mesh.size() - 1; i++)
-        midpoints.push_back((mesh[i] + mesh[i + 1]) / 2.0);
+        midpoints.push_back((mesh[i] + mesh[i + 1]) / 2.);
     return midpoints;
 }
