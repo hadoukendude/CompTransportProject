@@ -37,7 +37,7 @@ void initializeXS(struct Problem& prob, struct Geometry& geom, struct MatrixData
         if (prob.problemType == ProblemType::fixedsource)
             matrix_data.G[index] = prob.source[i];
         matNo = prob.materials[prob.cellMaterial[i]];
-        matrix_data.X[index] = prob.sigma[matNo] ? prob.sigma[matNo] : 1e-10;
+        matrix_data.X[index] = prob.sigma[matNo] ? prob.sigma[matNo] : 1e-8;
         matrix_data.S[index] = prob.sig_s[matNo];
         matrix_data.F[index] = prob.nsig_f[matNo];
     }

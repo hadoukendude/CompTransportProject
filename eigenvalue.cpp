@@ -4,6 +4,8 @@
 
 void solveTransportEV(struct MatrixData& mat, Eigen::MatrixXd CPMat)
 {
+    
+    
     Eigen::Index n{ mat.X.size() };
     mat.S.array() /= mat.X.array();
     mat.F.array() /= mat.X.array();
@@ -12,12 +14,13 @@ void solveTransportEV(struct MatrixData& mat, Eigen::MatrixXd CPMat)
     Eigen::MatrixXd I = Eigen::MatrixXd::Identity(n,n);
     Eigen::MatrixXd S = CPMat * mat.S.asDiagonal();
     Eigen::MatrixXd F = CPMat * mat.F.asDiagonal();
+    mat.H = (I-S);
     Eigen::MatrixXd A = (I - S).inverse() * F;
 
-    Eigen::EigenSolver<Eigen::MatrixXd> solver(A);
-    std::cout << "Largest Eigenvalue: " << solver.eigenvalues().real().maxCoeff() << std::endl; // Directly calculates eigenvalue
+    //Eigen::EigenSolver<Eigen::MatrixXd> solver(A);
+    //std::cout << "Largest Eigenvalue: " << solver.eigenvalues().real().maxCoeff() << std::endl; // Directly calculates eigenvalue, comment out for long runs
 
-    Eigen::VectorXd R0{ mat.Flux.array()*mat.D.array()*mat.X.array()};
+    Eigen::VectorXd R0{ mat.Flux.array() * mat.D.array() * mat.X.array() };
     Eigen::VectorXd R1{ A*R0 };
 
     double K1 = (R1.array() / mat.D.array() * mat.F.array()).sum() / (R0.array() / mat.D.array() * mat.F.array()).sum();
@@ -34,4 +37,6 @@ void solveTransportEV(struct MatrixData& mat, Eigen::MatrixXd CPMat)
     }
 
     mat.Flux = R1.array() / mat.X.array() / mat.D.array();
+    mat.R = R1;
+    mat.k = K1;
 }

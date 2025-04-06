@@ -6,4 +6,4 @@
 #include <Eigen/Dense>
 
 Eigen::MatrixXd createCollProbMatrix(const Problem& prob, const std::vector<std::vector<double>>& tau,
-    const struct MatrixData& matData);
+    struct MatrixData& matData);

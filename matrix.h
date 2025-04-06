@@ -5,7 +5,12 @@
 
 struct MatrixData
 {
-    Eigen::MatrixXd P; // collision probability matrix
+    Eigen::MatrixXd A; // albedo matrix
+    Eigen::MatrixXd P; // collision probability matrix (vol to vol)
+    Eigen::MatrixXd P_sv; // collision probability matrix (vol to surf)
+    Eigen::MatrixXd P_vs; // collision probability matrix (surf to vol)
+    Eigen::MatrixXd P_ss; // collision probability matrix (surf to surf)
+
     Eigen::VectorXd R; // collision rate vector
     Eigen::VectorXd D; // interval width vector
     Eigen::VectorXd G; // source vector

@@ -20,7 +20,7 @@ find_package(Eigen3 REQUIRED)
 find_package(sciplot REQUIRED)
 
 # Add source to this project's executable.  
-add_executable (CompTransportProject "main.cpp" "main.h" "input.cpp" "input.h" "tau.cpp" "geom.cpp" "geom.h" "tau.h" "collprob.cpp" "collprob.h" "matrix.h" "matrix.cpp" "eigenvalue.cpp" "plot.cpp" "plot.h" "fixedsource.cpp" "fixedsource.h" "eigenvalue.h")  
+add_executable (CompTransportProject "main.cpp" "main.h" "input.cpp" "input.h" "tau.cpp" "geom.cpp" "geom.h" "tau.h" "collprob.cpp" "collprob.h" "matrix.h" "matrix.cpp" "eigenvalue.cpp" "plot.cpp" "plot.h" "fixedsource.cpp" "fixedsource.h" "eigenvalue.h" "timer.h")  
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)  
  set_property(TARGET CompTransportProject PROPERTY CXX_STANDARD 20)  

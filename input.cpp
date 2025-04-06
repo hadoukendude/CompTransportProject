@@ -69,7 +69,7 @@ struct Problem parseInput(std::string name)
     // assign boundary conditions
     std::getline(file, line);
     line = std::strtok(&line[0], "=");
-    if (line == "specular")
+    if (line == "specular" || line == "spec")
         problem.lboundary = Lboundary::reflective;
     else if (line == "periodic")
         std::exit(1);
@@ -78,7 +78,7 @@ struct Problem parseInput(std::string name)
 
     std::getline(file, line);
     line = std::strtok(&line[0], "=");
-    if (line == "specular")
+    if (line == "specular" || line == "spec")
         problem.rboundary = Rboundary::reflective;
     else if (line == "periodic")
         std::exit(1);
