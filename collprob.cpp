@@ -160,37 +160,40 @@ Eigen::MatrixXd createCollProbMatrix(const Problem& prob, const std::vector<std:
         }
     }
 
-
-    std::vector<std::vector<double>> tau_r{ calculateTauR(matData) };
     Eigen::MatrixXd P_r{ Eigen::MatrixXd::Zero(n, n) };
-    for (size_t i = 0; i < n; i++)
+    if (prob.rboundary == Rboundary::reflective)
     {
-        sigma_i = matData.X[i];     // row/destination
-        delta_i = matData.D[i];
-        for (size_t j = 0; j < n; j++)
+        std::vector<std::vector<double>> tau_r{ calculateTauR(matData) };
+    
+        for (size_t i = 0; i < n; i++)
         {
-            sigma_j = matData.X[j];     // column/source
-            delta_j = matData.D[j];
-            if (i == j)
+            sigma_i = matData.X[i];     // row/destination
+            delta_i = matData.D[i];
+            for (size_t j = 0; j < n; j++)
             {
-                P_r(i, j) = 1. / (2. * sigma_j * delta_j) * (expint(3, tau_r[i][j]) - expint(3, tau_r[i][j] + sigma_i * delta_i)
-                    - expint(3, tau_r[i][j] + sigma_j * delta_j) + expint(3, tau_r[i][j] + sigma_i * delta_i + sigma_j * delta_j));
-            }
-            else
-            {
-                P_r(i, j) = 1. / (2. * sigma_j * delta_j) * (expint(3, tau_r[i][j]) - expint(3, tau_r[i][j] + sigma_i * delta_i)
-                    - expint(3, tau_r[i][j] + sigma_j * delta_j) + expint(3, tau_r[i][j] + sigma_i * delta_i + sigma_j * delta_j));
+                sigma_j = matData.X[j];     // column/source
+                delta_j = matData.D[j];
+                if (i == j)
+                {
+                    P_r(i, j) = 1. / (2. * sigma_j * delta_j) * (expint(3, tau_r[i][j]) - expint(3, tau_r[i][j] + sigma_i * delta_i)
+                        - expint(3, tau_r[i][j] + sigma_j * delta_j) + expint(3, tau_r[i][j] + sigma_i * delta_i + sigma_j * delta_j));
+                }
+                else
+                {
+                    P_r(i, j) = 1. / (2. * sigma_j * delta_j) * (expint(3, tau_r[i][j]) - expint(3, tau_r[i][j] + sigma_i * delta_i)
+                        - expint(3, tau_r[i][j] + sigma_j * delta_j) + expint(3, tau_r[i][j] + sigma_i * delta_i + sigma_j * delta_j));
+                }
             }
         }
     }
     //std::cout << P_r;
-
+    
 
     //calcSurftoSurf(matData);
     //calcSurfToVol(matData, calculateTauBC(matData));
     //calcVolToSurf(matData);
     if (prob.rboundary == Rboundary::reflective)
-        return P + P_r;
+        return P + P_r*0;
     else
         return P;
 }

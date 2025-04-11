@@ -42,10 +42,21 @@ int main()
     Timer timer;
     timer.start();
 
+    std::cout << R"(
+                   _  (`-')(`-')                   
+         _         \-.(OO )(OO )_.->               
+         \-,-----. _.'    \(_| \_)--. ,-.    ,-.   
+          |  .--./(_...--''\  `.'  /,-| |-.,-| |-. 
+         /_) (`-')|  |_.' | \    .')'-| |-''-| |-' 
+         ||  |OO )|  .___.' .'    \   `-'    `-'   
+        (_'  '--'\|  |     /  .'.  \               
+           `-----'`--'    `--'   '--'                      
+        )" << '\n';
+
     std::cout << "Reading input file..." << '\n';
-    Problem problem{ parseInput("problem2") };
+    Problem problem{ parseInput("testproblem") };
     
-    //problem.sig_a[2] *= 0.9;
+    //problem.sig_a[2] *= 1.00; // absorption xs perturbation
     //problem.sigma[2] = problem.sig_a[2] + problem.sig_s[2];
 
     //std::cout << "Materials: " << problem.materials << "Cells: " 
@@ -104,31 +115,32 @@ int main()
         solveTransportEV(matrix_data, collProbMat);
     }
 
-
+    /*
     // Eigenvalue perturbation
-    struct Problem pertprob = problem;
-    pertprob.sig_a[2] *= 0.9; // absorption xs perturbation
-    pertprob.sigma[2] = pertprob.sig_a[2] + pertprob.sig_s[2];
+    //struct Problem pertprob = problem;
+    //pertprob.sig_a[2] *= 1.00; // absorption xs perturbation
+    //pertprob.sigma[2] = pertprob.sig_a[2] + pertprob.sig_s[2];
 
-    struct MatrixData pertdata {};
-    pertdata.D = matrix_data.D;
-    initializeXS(pertprob, geometry, pertdata);
-    std::vector<std::vector<double>> pertODM{ createOpticalDepthMatrix(pertprob, geometry, pertdata.X) };
-    Eigen::MatrixXd pertCP{ createCollProbMatrix(pertprob, pertODM, pertdata) };
+    //struct MatrixData pertdata {};
+    //pertdata.D = matrix_data.D;
+    //initializeXS(pertprob, geometry, pertdata);
+    //std::vector<std::vector<double>> pertODM{ createOpticalDepthMatrix(pertprob, geometry, pertdata.X) };
+    //Eigen::MatrixXd pertCP{ createCollProbMatrix(pertprob, pertODM, pertdata) };
     
-    pertdata.S.array() = pertdata.S.array() / pertdata.X.array();
-    pertdata.F.array() = pertdata.F.array() / pertdata.X.array();
-    pertdata.H = matrix_data.H.transpose();
+    //pertdata.S.array() = pertdata.S.array() / pertdata.X.array();
+    //pertdata.F.array() = pertdata.F.array() / pertdata.X.array();
+    //pertdata.H = matrix_data.H.transpose();
 
-    Eigen::MatrixXd H = (collProbMat * matrix_data.S.asDiagonal()) - (pertCP * pertdata.S.asDiagonal());
+    //Eigen::MatrixXd H = (collProbMat * matrix_data.S.asDiagonal()) - (pertCP * pertdata.S.asDiagonal());
     Eigen::MatrixXd F_0 = collProbMat * matrix_data.F.asDiagonal();
-    Eigen::MatrixXd F = (pertCP * pertdata.F.asDiagonal()) - F_0 ;
+    //Eigen::MatrixXd F = (pertCP * pertdata.F.asDiagonal()) - F_0 ;
     Eigen::VectorXd R = matrix_data.R;
 
     // adjoint solver I guess
     std::cout << "Calculating adjoint flux..." << '\n';
-    Eigen::MatrixXd Z{ pertdata.H.inverse() * F_0.transpose() };
-    Eigen::VectorXd A0{ pertdata.Flux.array() * pertdata.D.array() * pertdata.X.array() };
+    Eigen::MatrixXd Z{ matrix_data.H.transpose().inverse() * F_0.transpose() };
+    //Eigen::VectorXd A0{ pertdata.Flux.array() * pertdata.D.array() * pertdata.X.array() };
+    Eigen::VectorXd A0{ matrix_data.Flux.array() * matrix_data.D.array() * matrix_data.X.array() }; 
     A0.normalize();
     Eigen::VectorXd A1{ (Z - (matrix_data.k * Eigen::MatrixXd::Identity(Z.rows(), Z.cols()))).inverse() * A0 };
 
@@ -139,16 +151,24 @@ int main()
     {
         A1 = (Z - (matrix_data.k * Eigen::MatrixXd::Identity(Z.rows(), Z.cols())) ).inverse() * A0; // rayleigh quotient iteration to find adjoint flux
         A0 = A1.normalized();
-        std::cout << ((Z * A0) - (matrix_data.k * A0)).maxCoeff() << std::endl;
+        //std::cout << ((Z * A0) - (matrix_data.k * A0)).maxCoeff() << std::endl;
     }
     A1 = A0.normalized();
     //std::cout << "adjie" << A1 << '\n';
 
-    std::cout << "Adjoint relation: " << ((A1.transpose() * matrix_data.H * matrix_data.R) - (matrix_data.R.transpose() * pertdata.H * A1)) << std::endl;
+    std::cout << "Adjoint relation: " << ((A1.transpose() * matrix_data.H * matrix_data.R) - (matrix_data.R.transpose() * matrix_data.H.transpose() * A1)) << std::endl;
 
-    auto lambda{ ((A1.transpose() * H * R) - (A1.transpose() * F * R / matrix_data.k)).array() / (A1.transpose() * F_0 * R).array()};
+    //auto lambda{ ((A1.transpose() * H * R) - (A1.transpose() * F * R / matrix_data.k)).array() / (A1.transpose() * F_0 * R).array()};
+    auto lambda{ (problem.sig_a[2] * A1.transpose() * R).array() / (A1.transpose() * F_0 * R).array() };
     //std::cout << A1 << '\n';
     std::cout << "Eigenvalue perturbation: " << lambda << '\n';
+    
+    for (double i = 0; i <= 20; i++)
+    {
+        auto lambda{ ((i*0.02 - 0.2) * problem.sig_a[2] * A1.transpose() * R).array() / (A1.transpose() * F_0 * R).array() };
+        std::cout << "Eigenvalue perturbation: " << lambda << '\n';
+    }
+    */
 
     timer.stop();
     std::cout << "Time elapsed: " << timer.elapsedSeconds() << " seconds" << '\n';

@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include "input.h"
 #include "matrix.h"
+#include <cmath>
 
 using namespace sciplot;
 void plotter(const MatrixData& mat, ProblemType::ProblemType pt)
@@ -13,19 +14,25 @@ void plotter(const MatrixData& mat, ProblemType::ProblemType pt)
         x[i] = mat.D(i) + x[i - 1];
 
     Plot2D plot;
+    plot.legend();
 
     plot.xlabel("z [cm]");
     if (pt == ProblemType::fixedsource)
     {
         plot.ylabel("Flux [n/cm**2/s]");
-        plot.drawCurve(x, mat.Flux.array());        
+        plot.drawCurve(x, mat.Flux.array());
     }
     else if (pt == ProblemType::eigenvalue)
     {
         plot.ylabel("Normalized Flux");
-        plot.drawCurve(x, mat.Flux.array()/mat.Flux.maxCoeff());
+        plot.drawCurve(x, mat.Flux.array()/mat.Flux.maxCoeff()).label("CPM");
     }
-    plot.legend().hide();
+
+    //std::vector <double> y(n);
+    //for (size_t i=0;i<n;i++)
+    //    y[i] = std::sin(0.197484176581 * (x[i]+0.4));
+    //plot.drawCurve(x, y).label("Diffusion Equation");
+
 
     // Create figure to hold plot
     Figure fig = { {plot} };
@@ -33,4 +40,5 @@ void plotter(const MatrixData& mat, ProblemType::ProblemType pt)
     Canvas canvas = { {fig} };
 
     canvas.show();
+    canvas.save("flux.png");
 }
